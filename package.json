@@ -11,7 +11,10 @@
     "type": "git",
     "url": "git+https://github.com/LingHS/Trailer-website.git"
   },
-  "keywords": ["movie", "trailer"],
+  "keywords": [
+    "movie",
+    "trailer"
+  ],
   "author": "LingHS",
   "license": "MIT",
   "bugs": {
@@ -19,6 +22,8 @@
   },
   "homepage": "https://github.com/LingHS/Trailer-website#readme",
   "dependencies": {
-    "koa": "^2.5.1"
+    "ejs": "^2.6.1",
+    "koa": "^2.5.1",
+    "koa-views": "^6.1.4"
   }
 }
