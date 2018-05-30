@@ -24,6 +24,7 @@
   "dependencies": {
     "ejs": "^2.6.1",
     "koa": "^2.5.1",
-    "koa-views": "^6.1.4"
+    "koa-views": "^6.1.4",
+    "puppeteer": "^1.4.0"
   }
 }
