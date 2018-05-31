@@ -25,6 +25,9 @@
     "ejs": "^2.6.1",
     "koa": "^2.5.1",
     "koa-views": "^6.1.4",
-    "puppeteer": "^1.4.0"
+    "puppeteer": "^1.4.0",
+    "request": "^2.87.0",
+    "request-promise-native": "^1.0.5",
+    "requset": "^1.0.5"
   }
 }

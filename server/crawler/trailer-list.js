@@ -3,7 +3,7 @@ const url = `https://movie.douban.com/explore#!type=movie&tag=%E7%83%AD%E9%97%A8
 
 const sleep = time => new Promise(resolve => {
     setTimeout(resolve, time)
-})
+}).catch((err) => console.log(err))
 
 ;
 (async () => {
@@ -22,6 +22,7 @@ const sleep = time => new Promise(resolve => {
         await sleep(3000)
         await page.click('.more')
     }
+    //热门列表
     const result = await page.evaluate(() => {
         var $ = window.$
         var items = $('.list-wp .list a')
@@ -44,5 +45,9 @@ const sleep = time => new Promise(resolve => {
         return links
     })
     browser.close()
-    console.log(result)
+    // console.log(result)
+    process.send({
+        result
+    })
+    process.exit(0)
 })()
