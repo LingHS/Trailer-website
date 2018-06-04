@@ -5,7 +5,16 @@ const {
     resolve
 } = require('path')
 const ejs = require('ejs')
+const {
+    connect,
+    initSchemas
+} = require('./database/init');
 
+(async () => {
+    await connect()
+    initSchemas()
+    require('./tasks/movie')
+})()
 app.use(views(resolve(__dirname, './views'), {
     extension: 'ejs'
 }))
