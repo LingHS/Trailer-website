@@ -21,11 +21,10 @@ const Movie = mongoose.model('Movie');
     })
     child.on('message', data => {
         let result = data.result
-        console.log(result)
         result.forEach(async item => {
             let movie = await Movie.findOne({
                 doubanId: item.doubanId
-            })
+            }).exec()
             if (!movie) {
                 movie = new Movie(item)
                 await movie.save()

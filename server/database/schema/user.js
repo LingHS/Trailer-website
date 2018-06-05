@@ -6,7 +6,7 @@ const SALT_WORK_FACTOR = 10
 const MAX_LOGIN_ATTEMPTS = 5
 const LOCK_TIME = 2 * 60 * 60 * 1000
 
-const userSchema = new Schema({
+const UserSchema = new Schema({
     username: {
         unique: true,
         required: true,
@@ -37,50 +37,60 @@ const userSchema = new Schema({
         }
     }
 })
-userSchema.virtual('isLocked').get(() => {
+UserSchema.virtual('isLocked').get(() => {
     return !!(this.lockUnitl && this.lockUntil > Date.now())
 })
-userSchema.pre('save', function (next) {
+
+UserSchema.pre('save', function (next) {
+    if (this.isNew) {
+        this.meta.createdAt = this.meta.updatedAt = Date.now()
+    } else {
+        this.meta.updatedAt = Date.now()
+    }
+
+    next()
+})
+
+UserSchema.pre('save', function (next) {
+    let user = this
+
     if (!user.isModified('password')) return next()
 
     bcrypt.genSalt(SALT_WORK_FACTOR, (err, salt) => {
         if (err) return next(err)
-        bcrypt.hash(user.passwordm, salt, (error, hash) => {
+
+        bcrypt.hash(user.password, salt, (error, hash) => {
             if (error) return next(error)
-            this.password = hash
+
+            user.password = hash
             next()
         })
-        next()
     })
-
-    if (this.isNew) {
-        this.meta.createdAt = this.meta.updateAt = Date.now()
-    } else {
-        this.meta.updatedAt = Date.now()
-    }
-    next()
 })
-userSchema.methods = {
-    comparePassword: (_password, password) => {
+
+
+UserSchema.methods = {
+    comparePassword: function (_password, password) {
         return new Promise((resolve, reject) => {
-            bcrypt.compare(_password, password, (err, isMatch) => {
+            bcrypt.compare(_password, password, function (err, isMatch) {
                 if (!err) resolve(isMatch)
                 else reject(err)
             })
         })
     },
-    incLoginAttepts: (user) => {
+    incLoginAttempts: function (user) {
+        const that = this
+
         return new Promise((resolve, reject) => {
-            //用户被锁定且锁定时间过期
-            if (this.lockUnitl && this.Until < Date.now()) {
-                this.update({
+            if (that.lockUntil && that.lockUntil < Date.now()) {
+                that.update({
                     $set: {
                         loginAttempts: 1
                     },
                     $unset: {
                         lockUntil: 1
                     }
-                }, (err) => {
+                }, function (err) {
                     if (!err) resolve(true)
                     else reject(err)
                 })
@@ -90,19 +100,19 @@ userSchema.methods = {
                         loginAttempts: 1
                     }
                 }
-                //用户没被锁定且登录次数超过最大限制
-                if (this.loginAttempts + 1 >= MAX_LOGIN_ATTEMPTS && !this.isLocked) {
+
+                if (that.loginAttempts + 1 >= MAX_LOGIN_ATTEMPTS && !that.isLocked) {
                     updates.$set = {
                         lockUntil: Date.now() + LOCK_TIME
                     }
                 }
-                this.update(updates, err => {
+
+                that.update(updates, err => {
                     if (!err) resolve(true)
                     else reject(err)
                 })
             }
         })
-
     }
 }
-mongoose.model('User', userSchema)
+mongoose.model('User', UserSchema)
