@@ -6,28 +6,45 @@ const {
 const ejs = require('ejs')
 const {
     connect,
-    initSchemas
+    initSchemas,
+    initAdmin
 } = require('./database/init');
-
-const router = require('./routes');
+const R = require('ramda')
+const MIDDLEWARES = ['router'];
+const useMiddlewares = (app) => {
+    R.map(
+        R.compose(
+            R.forEachObjIndexed(
+                initWith => initWith(app)
+            ),
+            require,
+            name => resolve(__dirname, `./middlewares/${name}`)
+        )
+    )(MIDDLEWARES)
+};
 (async () => {
     await connect()
     initSchemas()
+    await initAdmin()
     //require('./tasks/movie')
+    const app = new Koa()
+    await useMiddlewares(app)
+
+    app.listen(4455)
 })()
 
 
-const app = new Koa()
-app.use(router.routes()).use(router.allowedMethods())
-app.use(views(resolve(__dirname, './views'), {
-    extension: 'ejs'
-}))
 
-app.use(async (ctx, next) => {
-    await ctx.render('index', {
-        you: 'Luke',
-        me: 'Scott',
-        title: '首页'
-    })
-})
-app.listen(4455)
+
+
+// app.use(views(resolve(__dirname, './views'), {
+//     extension: 'ejs'
+// }))
+
+// app.use(async (ctx, next) => {
+//     await ctx.render('index', {
+//         you: 'Luke',
+//         me: 'Scott',
+//         title: '首页'
+//     })
+// })
